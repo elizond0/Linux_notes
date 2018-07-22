@@ -70,3 +70,46 @@
 2. -n 显示文件尾部多少行的内容(n为数字)  tail -n 3 /var/log/secure  #查看最后3行记录
 3. -f 动态显示数据（不关闭）,常用来查看日志   tail -f /var/log/secure   #在一个终端执行此命令动态查看文件内容
 4. ssh root@192.168.1.80在另一个终端远程登录Linux，登录成功后，在前一个终端可以动态看到登陆成功的日志
+
+## 4.xfs文件系统的备份和恢复
+
+### 4.1 xfs文件系统简介
+
+* centos7选择xfs格式作为默认文件系统，而且不再使用以前的ext，仍然支持ext4，xfs专为大数据产生，每个单个文件系统最大可以支持8eb，单个文件可以支持16tb，不仅数据量大，而且扩展性高。还可以通过xfsdump，xfsrestore来备份和恢复。XFS提供了 xfsdump 和 xfsrestore 工具协助备份XFS文件系统中的数据。xfsdump 按inode顺序备份一个XFS文件系统。
+
+* 与传统的UNIX文件系统不同，XFS不需要在备份前被卸载；对使用中的XFS文件系统做备份就可以保证镜像的一致性。XFS的备份和恢复的过程是可以被中断然后继续的，无须冻结文件系统。xfsdump 甚至提供了高性能的多线程备份操作——它把一次dump拆分成多个数据流，每个数据流可以被发往不同的目的地
+
+* xfsdump的备份级别有两种: 0 - 完全备份 ; 1~9 : 增量备份
+1. 完全备份：每次都把指定的备份目录完整的复制一遍，不管目录下的文件有没有变化；
+2. 增量备份：每次将之前（第一次、第二次、直到前一次）做过备份之后有变化的文件进行备份；
+3. 差异备份：每次都将第一次完整备份以来有变化的文件进行备份。
+
+### 4.2 准备备份环境
+
+* 对新添加的硬盘进行格式化并挂载的步骤：
+1. 虚拟机设置中使用默认配置添加硬盘
+2. 指定分区的设备：# fdisk /dev/sdb
+3. 依次输入以下命令：命令(输入 m 获取帮助)：n (创建一个新的分区) => Select (default p): p (主要分区) => 扇区： +1G (指定分区大小) => 命令(输入 m 获取帮助)：p (打印分区表) => 命令(输入 m 获取帮助)：w (保存；配置)
+4. 查看新增的硬盘分区(/dev/sdb1)：# ls /dev/sdb*
+5. 格式化分区：# mkfs.xfs /dev/sdb1
+6. 挂载分区：# mkdir /sdb1 ; # mount /dev/sdb1 /sdb1
+7. 准备测试文件：# cd /sdb1/ => # cp /etc/passwd ./ => # mkdir test => # touch test/a => # tree /sdb1/
+
+### 4.3 备份
+
+* 备份整个分区 (类似是虚拟机的快照，服务器被黑后，进行快速恢复)
+1. xfsdump -f 备份存放位置 要备份路径或设备文件 (注意：备份的路径这里不能写成/sdb1/。  可以是/dev/sdb1 或/sdb1)
+2. please enter label for this dump session -> dump_sdb1  (指定备份会话标签)
+3. please enter label for media in drive 0  -> sdb1  (指定设备标签，就是对要备份的设备做一个描述)
+
+* 指定备份时免交互操作，方便后期做定时备份
+1. xfsdump -f /opt/dump_passwd /sdb1 -L dump_passwd -M media1
+2. -L ：xfsdump 记录每次备份的 session 标头，这里可以填写针对此文件系统的简易说明
+3. -M ：xfsdump 可以纪录储存媒体的标头，这里可以填写此媒体的简易说明
+
+* 指定只备份分区中某个目录
+1. xfsdump -f /opt/dump_grub2 -s grub2/grub.cfg /boot -L dump_grub2 -M boot-sda1
+2. 参数：-s 文件路径  (只对指定的文件进行备份，-s指定时，路径写的是相对路径，-s可以是文件或目录)
+
+* 查看备份信息与内容 : xfsdump  -I（字母大写i） 可以在/var/lib/xfsdump/inventory目录下看到生成的档案信息
+

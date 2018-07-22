@@ -98,7 +98,7 @@
 ### 4.3 备份
 
 * 备份整个分区 (类似是虚拟机的快照，服务器被黑后，进行快速恢复)
-1. xfsdump -f 备份存放位置 要备份路径或设备文件 (注意：备份的路径这里不能写成/sdb1/。  可以是/dev/sdb1 或/sdb1)
+1. 语法：xfsdump -f 备份存放位置 要备份路径或设备文件 (注意：备份的路径这里不能写成/sdb1/。  可以是/dev/sdb1 或/sdb1)
 2. please enter label for this dump session -> dump_sdb1  (指定备份会话标签)
 3. please enter label for media in drive 0  -> sdb1  (指定设备标签，就是对要备份的设备做一个描述)
 
@@ -112,4 +112,14 @@
 2. 参数：-s 文件路径  (只对指定的文件进行备份，-s指定时，路径写的是相对路径，-s可以是文件或目录)
 
 * 查看备份信息与内容 : xfsdump  -I（字母大写i） 可以在/var/lib/xfsdump/inventory目录下看到生成的档案信息
+
+### 4.4 恢复
+
+* 语法：xfsrestore -f 指定恢复文件的位置 指定存放恢复后的文件的路径
+1. xfsrestore -f /opt/dump_sdb1  /sdb1
+2. xfsdump 不支持没有挂载的文件系统备份！所以只能备份已挂载的
+3. xfsdump 必须使用 root 的权限才能操作 (涉及文件系统的关系)
+4. xfsdump 只能备份 XFS 文件系统
+5. xfsdump 备份下来的数据 (档案或储存媒体) 只能让 xfsrestore 解析
+6. xfsdump 是透过文件系统的 UUID 来分辨各个备份档的，因此不能备份两个具有相同 UUID 的文件系统
 

@@ -107,6 +107,7 @@
 
 * 在xshell终端中 rz 文件名 (虚拟机从本机中read读取)
 * 在xshell终端中 sz 文件名 (虚拟机向本机send发送)
+* 在xshell终端中 gnome-terminal/firefox 等等 可以直接调起图形化界面的程序
 
 ## 8. 解决window汉字文件在linux中乱码
 

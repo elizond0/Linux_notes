@@ -102,3 +102,35 @@
 * 永久设置，生成配置文件保存起来
 1. vim /etc/vimrc 设置后影响系统所有的用户
 2. vim ~/.vimrc 在用户目录下创建.vimrc,只影响当前用户(建议在用户下设置)
+
+## 7. 利用xshell进行linux虚拟机与windows本机的文件交换
+
+* 在xshell终端中 rz 文件名 (虚拟机从本机中read读取)
+* 在xshell终端中 sz 文件名 (虚拟机向本机send发送)
+
+## 8. 解决window汉字文件在linux中乱码
+
+* 原因：编码的问题
+
+* 通过iconv命令转码，参数：
+1. -f, --from-code=名称 原始文本编码
+2. -t, --to-code=输出编码
+3. -o, --output=FILE 输出文件名
+4. iconv -f gb2312 -t utf8 (文件) -o aa.txt
+
+## 9. 解决linux文件在windows上打开串行
+
+* 原因：windows和linux处理回车方法不同
+
+* 使用工具dos2unix进行转换
+1. rpm -ivh /mnt/Packages/dos2unix-6.0.3-7.el7.x86_64.rpm (安装工具)
+2. unix2dos 文件名 (转换)
+3. sz 文件名 (发送)
+
+## 10. 恢复误删除的文件
+
+* rm -rf /* 可以删除根目录下的所有文件，很危险！
+
+* ext4文件系统上删除文件，可以恢复: extundelete ，ext3恢复使用：ext3grep
+
+* windows恢复误删除的文件：  final data v2.0 汉化版  和  easyrecovery
